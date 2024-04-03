@@ -19,5 +19,6 @@ public class UserInfo : MonoBehaviour
     public void SetID(string id)
     {
         userID = id;
+        //Debug.Log(id);
     }
 }

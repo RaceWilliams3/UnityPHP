@@ -5,20 +5,23 @@ using UnityEngine.Networking;
 
 public class Web : MonoBehaviour
 {
+
+    string dbURL = "https://mysim421.000webhostapp.com/";
     void Start()
     {
         //StartCoroutine(GetDate());
         //StartCoroutine(RegisterUser("testuser3", "1234"));
     }
     
-    /*public void ShowUserItems()
+    
+    public void ShowUserItems()
     {
-        StartCoroutine(GetItemsIDs(Main.Instance.userInfo.userID));
-    }*/
+       // StartCoroutine(GetItemsIDs(Main.Instance.userInfo.userID));
+    }
 
     public IEnumerator GetDate()
     {
-        using (UnityWebRequest www = UnityWebRequest.Get("http://localhost/UnityBackendTutorial/GetDate.php"))
+        using (UnityWebRequest www = UnityWebRequest.Get(dbURL + "GetDate.php"))
         {
             yield return www.Send();
 
@@ -37,7 +40,7 @@ public class Web : MonoBehaviour
 
     public IEnumerator GetUsers()
     {
-        using (UnityWebRequest www = UnityWebRequest.Get("http://localhost/UnityBackendTutorial/GetUsers.php"))
+        using (UnityWebRequest www = UnityWebRequest.Get(dbURL + "GetUsers.php"))
         {
             yield return www.Send();
 
@@ -60,7 +63,7 @@ public class Web : MonoBehaviour
         form.AddField("loginUser", username);
         form.AddField("loginPass", password);
 
-        using (UnityWebRequest www = UnityWebRequest.Post("http://localhost/UnityBackendTutorial/Login.php",form))
+        using (UnityWebRequest www = UnityWebRequest.Post(dbURL + "Login.php", form))
         {
             yield return www.SendWebRequest();
 
@@ -70,7 +73,7 @@ public class Web : MonoBehaviour
             }
             else
             {
-                Debug.Log(www.downloadHandler.text);
+                //Debug.Log(www.downloadHandler.text);
                 Main.Instance.userInfo.SetCredentials(username,password);
                 Main.Instance.userInfo.SetID(www.downloadHandler.text);
 
@@ -95,7 +98,7 @@ public class Web : MonoBehaviour
         form.AddField("loginUser", username);
         form.AddField("loginPass", password);
 
-        using (UnityWebRequest www = UnityWebRequest.Post("http://localhost/UnityBackendTutorial/RegisterUser.php", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(dbURL + "RegisterUser.php", form))
         {
             yield return www.SendWebRequest();
 
@@ -117,7 +120,34 @@ public class Web : MonoBehaviour
         form.AddField("userID", userID);
 
 
-        using (UnityWebRequest www = UnityWebRequest.Post("http://localhost/UnityBackendTutorial/GetItemsIDs.php", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(dbURL + "GetItemsIDs.php", form))
+        {
+            yield return www.Send();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Debug.Log("Download Handler Text: ");
+                Debug.Log(www.downloadHandler.text);
+
+                string jsonArray = www.downloadHandler.text;
+                //Call callback function to pass results
+
+                callback(jsonArray);
+            }
+        }
+    }
+
+    public IEnumerator GetItem(string itemID, System.Action<string> callback)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("itemID", itemID);
+
+
+        using (UnityWebRequest www = UnityWebRequest.Post(dbURL + "GetItem.php", form))
         {
             yield return www.Send();
 
@@ -137,13 +167,16 @@ public class Web : MonoBehaviour
         }
     }
 
-    public IEnumerator GetItem(string itemID, System.Action<string> callback)
+
+    public IEnumerator SellItem(string ID, string itemID, string userID)
     {
         WWWForm form = new WWWForm();
+        form.AddField("ID", ID);
         form.AddField("itemID", itemID);
+        form.AddField("userID", userID);
 
 
-        using (UnityWebRequest www = UnityWebRequest.Post("http://localhost/UnityBackendTutorial/GetItem.php", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(dbURL + "SellItem.php", form))
         {
             yield return www.Send();
 
@@ -154,11 +187,28 @@ public class Web : MonoBehaviour
             else
             {
                 Debug.Log(www.downloadHandler.text);
+            }
+        }
+    }
 
-                string jsonArray = www.downloadHandler.text;
-                //Call callback function to pass results
+    public IEnumerator GetItemIcon(string itemID, System.Action<byte[]> callback)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("itemID", itemID);
 
-                callback(jsonArray);
+        using (UnityWebRequest www = UnityWebRequest.Post(dbURL + "GetItemIcon.php", form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+            } else
+            {
+                byte[] bytes = www.downloadHandler.data;
+
+               
+                callback(bytes);
             }
         }
     }
