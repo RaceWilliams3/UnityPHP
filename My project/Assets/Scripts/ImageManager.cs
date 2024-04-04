@@ -39,6 +39,7 @@ public class ImageManager : MonoBehaviour
     {
         if (ImageExists(name))
         {
+            Debug.Log("Loading Image: " + name);
             return File.ReadAllBytes(_basePath + name);
         }
         else

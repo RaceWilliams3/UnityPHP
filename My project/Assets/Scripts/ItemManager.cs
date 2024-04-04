@@ -71,7 +71,7 @@ public class ItemManager : MonoBehaviour
             itemGo.transform.Find("Description").GetComponent<TextMeshProUGUI>().text = itemInfoJson["description"];
 
 
-            byte[] bytes = ImageManager.Instance.LoadImage(itemId);
+            byte[] bytes = ImageManager.Instance.LoadImage(itemId + ".png");
             if (bytes.Length == 0)
             {
                 Action<byte[]> getItemIconCallback = (downloadedBytes) =>
@@ -79,24 +79,18 @@ public class ItemManager : MonoBehaviour
                     //convert bytes into sprite
                     Sprite sprite = ImageManager.Instance.BytesToSprite(downloadedBytes);
                     itemGo.transform.Find("Image").GetComponent<Image>().sprite = sprite;
-                    ImageManager.Instance.SaveImage(itemId, downloadedBytes);
+                    ImageManager.Instance.SaveImage(itemId + ".png", downloadedBytes);
 
                 };
 
-                StartCoroutine(Main.Instance.web.GetItemIcon(itemId, getItemIconCallback));
+                StartCoroutine(Main.Instance.web.GetItemIcon(itemId + ".png", getItemIconCallback));
             } 
             else
             {
+                Debug.Log("Loaded Bytes Length: " + bytes.Length);
                 Sprite sprite = ImageManager.Instance.BytesToSprite(bytes);
                 itemGo.transform.Find("Image").GetComponent<Image>().sprite = sprite;
             }
-
-
-
-            
-
-
-
 
 
             //Set the Sell Button
